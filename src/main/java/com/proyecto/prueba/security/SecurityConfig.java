@@ -52,6 +52,8 @@ public class SecurityConfig {
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.GET,"/api/**").hasAnyAuthority( "ADMIN")
                 .requestMatchers(HttpMethod.DELETE,"/api/**").hasAuthority("ADMIN")
