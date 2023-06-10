@@ -30,6 +30,7 @@ public class LoanController {
         }
     }
 
+
     @PostMapping(path = "save", consumes =  MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> saveLoan(@RequestBody LoanDTO loanDTO) {
         try {

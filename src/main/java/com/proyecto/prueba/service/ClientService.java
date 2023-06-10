@@ -10,9 +10,15 @@ import java.util.List;
 public interface ClientService {
 
     @Qualifier(value = "ClientServiceImpl")
-    List<ClientDTO> findClients();
+    List<ClientDTO> findClients() throws Exception;
 
-    @Qualifier(value = "ServiceImplClient")
+    @Qualifier(value = "ClientServiceImpl")
     String saveClient (ClientDTO clientDTO) throws IllegalAccessException;
+
+    @Qualifier(value = "ClientServiceImpl")
+    String updateClient (ClientDTO clientDTO) throws IllegalAccessException;
+
+    @Qualifier(value = "ClientServiceImpl")
+    String deleteClient (Long identification);
 
 }

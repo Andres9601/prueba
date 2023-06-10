@@ -19,7 +19,7 @@ public class ClientController {
     @Autowired
     ClientService clientService;
 
-    @GetMapping(path= "findClients", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "findClients", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> findClients() {
         try {
             return ResponseEntity.ok(clientService.findClients());
@@ -29,7 +29,7 @@ public class ClientController {
         }
     }
 
-    @PostMapping(path = "save", consumes =  MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "save", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> saveclient(@RequestBody ClientDTO clientDTO) {
         try {
             return ResponseEntity.ok(clientService.saveClient(clientDTO));
@@ -39,4 +39,25 @@ public class ClientController {
         }
     }
 
+    @PutMapping(path = "update", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> updateClient(@RequestBody ClientDTO clientDTO) {
+        try {
+            return ResponseEntity.ok(clientService.updateClient(clientDTO));
+
+        } catch (Exception e) {
+            logger.error("error en {} ", ClientController.class + e.getMessage());
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping(path = "delete")
+    public ResponseEntity<String> deleteClient(@RequestParam("identification") Long identification) {
+        try {
+            return ResponseEntity.ok(clientService.deleteClient(identification));
+        } catch (Exception e) {
+            logger.error("error en {} ", ClientController.class + e.getMessage());
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getCause() + e.getMessage());
+        }
+
+    }
 }

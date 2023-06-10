@@ -31,7 +31,11 @@ public class ClientDTO {
 
     private String classification;
 
+    private Boolean active;
+
     private Set<Loan> userLoans;
+
+
 
     public Long getIdentification() {
         return identification;
@@ -119,5 +123,13 @@ public class ClientDTO {
 
     public void setClientType(String clientType) {
         this.clientType = clientType;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 }
