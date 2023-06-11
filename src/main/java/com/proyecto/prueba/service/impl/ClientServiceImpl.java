@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -98,8 +97,31 @@ public class ClientServiceImpl implements ClientService {
             logger.info(" Pasando cambios al cliente encontrado");
 
             Client client = clientTemp.get();
+            switch (clientDTO.getClientType()) {
+                case "Employee":
+                    Period period = Period.between(clientDTO.getContractStartDate()
+                            .toInstant()
+                            .atZone(ZoneId.systemDefault()).toLocalDate(), LocalDate.now());
+                    if (period.getYears() < 1) {
+                        clientDTO.setClassification("A");
+                    } else {
+                        switch (period.getYears()) {
+                            case 1:
+                                clientDTO.setClassification("B");
+                                break;
+                            default:
+                                clientDTO.setClassification("C");
+                        }
+                    }
+                    break;
+                case "Independent":
+                    clientDTO.setContractStartDate(null);
+                    clientDTO.setClassification("A");
+                    break;
+                default:
+                    throw new IllegalArgumentException(" El tipo de cliente debe ser Employee o Independent");
+            }
             utilsOperations.copyFields(clientDTO, client);
-            Date date = new Date();
             logger.info(" Actualizando en base de datos el cliente encontrado ");
             clientRepository.save(client);
             logger.info(" Cliente actualizado con Exito");

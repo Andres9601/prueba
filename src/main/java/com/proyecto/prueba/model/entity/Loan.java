@@ -2,7 +2,6 @@ package com.proyecto.prueba.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,6 +18,7 @@ import java.util.Date;
 public class Loan {
 
     @Id
+    @Column(name = "id_loan")
     private Long idLoan;
 
     private Date createDate;
@@ -32,6 +32,8 @@ public class Loan {
     private Long installments;
 
     private Long installmentsPaid;
+
+    private BigDecimal installmentValue;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "Client")
@@ -92,6 +94,14 @@ public class Loan {
 
     public void setInstallmentsPaid(Long installmentsPaid) {
         this.installmentsPaid = installmentsPaid;
+    }
+
+    public BigDecimal getInstallmentValue() {
+        return installmentValue;
+    }
+
+    public void setInstallmentValue(BigDecimal installmentValue) {
+        this.installmentValue = installmentValue;
     }
 
     public Client getClient() {

@@ -1,6 +1,5 @@
 package com.proyecto.prueba.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.proyecto.prueba.model.entity.Client;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,6 +27,8 @@ public class LoanDTO {
     private Long installments;
 
     private Long installmentsPaid;
+
+    private BigDecimal installmentValue;
 
     private Client client;
 

@@ -1,6 +1,8 @@
 package com.proyecto.prueba.service;
 
+import com.proyecto.prueba.model.dto.ClientDTO;
 import com.proyecto.prueba.model.dto.LoanDTO;
+import com.proyecto.prueba.model.dto.NewLoanDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -10,8 +12,14 @@ import java.util.List;
 public interface LoanService {
 
     @Qualifier(value = "LoanServiceImpl")
-    List<LoanDTO> findLoans();
+    List<LoanDTO> findLoans() throws Exception;
 
     @Qualifier(value = "LoanServiceImpl")
-    String saveLoan (LoanDTO loanDTO) throws IllegalAccessException;
+    String saveLoan (NewLoanDTO loanDTO) throws IllegalAccessException;
+
+    @Qualifier(value = "LoanServiceImpl")
+    String updateLoan (LoanDTO loanDTO) throws IllegalAccessException;
+
+    @Qualifier(value = "LoanServiceImpl")
+    String deleteLoan (Long idLoan);
 }
