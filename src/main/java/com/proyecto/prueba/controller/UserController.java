@@ -24,6 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * The controller class for user authentication and registration.
+ */
 @RestController
 @RequestMapping("/api/auth/")
 public class UserController {
@@ -41,6 +44,12 @@ public class UserController {
     private JwtGenerator jwtGenerator;
 
 
+    /**
+     * Endpoint to register an admin user.
+     *
+     * @param logUpDTO The LogUpDTO object containing the admin user details.
+     * @return ResponseEntity with a success message on success, or an error message on failure.
+     */
     @PostMapping("registerAdm")
     public ResponseEntity<String> registrarAdmin(@RequestBody LogUpDTO logUpDTO) {
         User user = new User();
@@ -59,6 +68,12 @@ public class UserController {
         return new ResponseEntity<>("Registro de admin exitoso", HttpStatus.OK);
     }
 
+    /**
+     * Endpoint to authenticate a user and generate a JWT token.
+     *
+     * @param loginDTO The LoginDTO object containing the user's login credentials.
+     * @return ResponseEntity with the JWT token on success, or an error message on failure.
+     */
     @PostMapping("login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginDTO loginDTO) {
         try{

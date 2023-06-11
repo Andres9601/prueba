@@ -11,6 +11,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * The controller class for the Client database table.
+ *
+ */
+
 @RestController
 @RequestMapping("/api/client/")
 @SecurityRequirement(name = "bearerAuth")
@@ -21,6 +26,12 @@ public class ClientController {
     @Autowired
     ClientService clientService;
 
+
+    /**
+     * Endpoint to retrieve all clients.
+     *
+     * @return ResponseEntity with the list of clients in JSON format.
+     */
     @GetMapping(path = "findClients", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> findClients() {
         try {
@@ -31,6 +42,12 @@ public class ClientController {
         }
     }
 
+    /**
+     * Endpoint to save a new client.
+     *
+     * @param clientDTO The ClientDTO object representing the client to be saved.
+     * @return ResponseEntity with a success message on success, or an error message on failure.
+     */
     @PostMapping(path = "save", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> saveclient(@RequestBody ClientDTO clientDTO) {
         try {
@@ -41,6 +58,12 @@ public class ClientController {
         }
     }
 
+    /**
+     * Endpoint to update an existing client.
+     *
+     * @param clientDTO The ClientDTO object representing the client to be updated.
+     * @return ResponseEntity with a success message on success, or an error message on failure.
+     */
     @PutMapping(path = "update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> updateClient(@RequestBody ClientDTO clientDTO) {
         try {
@@ -52,6 +75,12 @@ public class ClientController {
         }
     }
 
+    /**
+     * Endpoint to delete a client.
+     *
+     * @param identification The identification ID of the client to be deleted.
+     * @return ResponseEntity with a success message on success, or an error message on failure.
+     */
     @DeleteMapping(path = "delete")
     public ResponseEntity<String> deleteClient(@RequestParam("identification") Long identification) {
         try {

@@ -7,6 +7,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+
+/**
+ * Configuration class for Swagger documentation.
+ */
 @Configuration
 @SecurityScheme(
         name = "bearerAuth",
@@ -17,6 +21,12 @@ import io.swagger.v3.oas.models.info.Info;
         in = SecuritySchemeIn.HEADER
 )
 public class SwaggerConfig {
+
+    /**
+     * Creates and configures the OpenAPI instance for the users microservice.
+     *
+     * @return The configured OpenAPI instance.
+     */
     @Bean
     public OpenAPI usersMicroserviceOpenAPI() {
         return new OpenAPI()
@@ -24,7 +34,6 @@ public class SwaggerConfig {
                         .description("Prueba ALMI")
                         .version("1.0"));
     }
-
 
 
 }
