@@ -2,6 +2,7 @@ package com.proyecto.prueba.service.impl;
 
 import com.proyecto.prueba.model.dto.LoanDTO;
 import com.proyecto.prueba.model.dto.NewLoanDTO;
+import com.proyecto.prueba.model.dto.PayInstallmentsDTO;
 import com.proyecto.prueba.model.entity.Client;
 import com.proyecto.prueba.model.entity.Loan;
 import com.proyecto.prueba.repository.ClientRepository;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,6 +95,9 @@ public class LoanServiceImpl implements LoanService {
             addition=  addition.add(installment);
         }
         loanDTO.setInstallmentValue(addition.divide(BigDecimal.valueOf(loanDTO.getInstallments())));
+        loanDTO.setBalance(loanDTO.getValue());
+        loanDTO.setCreateDate(new Date());
+        loanDTO.setStatus("active");
         utilsOperations.copyFields(loanDTO,loan);
         loanRepository.save(loan);
         return "Loan guardado con Exito";
@@ -120,4 +125,32 @@ public class LoanServiceImpl implements LoanService {
             throw new IllegalArgumentException(" El loan no existe en el sistema");
         }
     }
+
+    @Override
+    public String payIntallments(PayInstallmentsDTO payInstallmentsDTO) throws IllegalAccessException {
+        Optional<Loan> loanTemp = loanRepository.findById(payInstallmentsDTO.getIdLoan());
+        if (loanTemp.isPresent()) {
+            LoanDTO loanDTO= new LoanDTO();
+            utilsOperations.copyFields(loanTemp.get(),loanDTO);
+            logger.info(" Loan encontrado");
+            logger.info(" Pagando Cuotas al loan encontrado");
+            if(payInstallmentsDTO.getNumber()<= (loanDTO.getInstallments()-loanDTO.getInstallmentsPaid())) {
+                loanDTO.setInstallmentsPaid(loanDTO.getInstallmentsPaid() + payInstallmentsDTO.getNumber());
+                BigDecimal partialInstallments = loanDTO.getValue().divide(BigDecimal.valueOf(loanDTO.getInstallments()),RoundingMode.UP);
+                loanDTO.setBalance(loanDTO.getBalance().subtract(partialInstallments.multiply(BigDecimal.valueOf(loanDTO.getInstallmentsPaid()))));
+                Loan loan = new Loan();
+                utilsOperations.copyFields(loanDTO,loan);
+                loanRepository.save(loan);
+                logger.info(" Loan actualizado con Exito");
+                return "Loan actualizado con Exito";
+            }else {
+                throw new IllegalArgumentException(" No se pueden pagar ese numero de cuotas");
+            }
+        } else {
+            throw new IllegalArgumentException(" El loan no existe en el sistema");
+        }
+    }
+
 }
+
+

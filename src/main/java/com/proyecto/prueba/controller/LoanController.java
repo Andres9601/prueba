@@ -1,8 +1,8 @@
 package com.proyecto.prueba.controller;
 
-import com.proyecto.prueba.model.dto.ClientDTO;
 import com.proyecto.prueba.model.dto.LoanDTO;
 import com.proyecto.prueba.model.dto.NewLoanDTO;
+import com.proyecto.prueba.model.dto.PayInstallmentsDTO;
 import com.proyecto.prueba.service.LoanService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,4 +62,16 @@ public class LoanController {
         }
 
     }
+
+    @PutMapping(path = "payIntallments", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> payIntallments(@RequestBody PayInstallmentsDTO payInstallmentsDTO) {
+        try {
+            return ResponseEntity.ok(loanService.payIntallments(payInstallmentsDTO));
+
+        } catch (Exception e) {
+            logger.error("error en {} ", LoanController.class + e.getMessage());
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+        }
+    }
+
 }
