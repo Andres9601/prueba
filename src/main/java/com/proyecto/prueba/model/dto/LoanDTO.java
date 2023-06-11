@@ -30,6 +30,8 @@ public class LoanDTO {
 
     private BigDecimal installmentValue;
 
+    private BigDecimal balance;
+
     private Client client;
 
 

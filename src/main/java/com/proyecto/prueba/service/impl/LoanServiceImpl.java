@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,6 +62,7 @@ public class LoanServiceImpl implements LoanService {
         Loan loan =new Loan();
         LoanDTO loanDTO = newloanDTO.getLoanDTO();
         Optional<Client> client = clientRepository.findById(newloanDTO.getClientId());
+        loanDTO.setInstallmentsPaid(0L);
         loanDTO.setClient(client.get());
 
         switch (client.get().getClassification()){
@@ -72,7 +75,24 @@ public class LoanServiceImpl implements LoanService {
             default:
                 loanDTO.setInterestRate(BigDecimal.valueOf(1L));
         }
-
+        Long additionalMonths;
+        if (loanDTO.getInstallments()>6) { additionalMonths = loanDTO.getInstallments()-6L;
+        loanDTO.setInterestRate(loanDTO.getInterestRate().add(BigDecimal.valueOf(0.1).multiply(BigDecimal.valueOf(additionalMonths))));
+        }
+        List<BigDecimal> installments = new ArrayList<>();
+        for( int i =0; i<loanDTO.getInstallments();i++ ){
+            BigDecimal parcialInstallment = loanDTO.getValue().divide(BigDecimal.valueOf(loanDTO.getInstallments()), RoundingMode.UP);
+            BigDecimal totalValue = loanDTO.getValue().subtract( parcialInstallment.multiply(BigDecimal.valueOf(i)) );
+            BigDecimal interest = totalValue.multiply(loanDTO.getInterestRate().divide(BigDecimal.valueOf(100)));
+            BigDecimal value = parcialInstallment.add( interest );
+            installments.add(value);
+        }
+        BigDecimal addition = BigDecimal.valueOf(0);
+        for (BigDecimal installment:installments
+             ) {
+            addition=  addition.add(installment);
+        }
+        loanDTO.setInstallmentValue(addition.divide(BigDecimal.valueOf(loanDTO.getInstallments())));
         utilsOperations.copyFields(loanDTO,loan);
         loanRepository.save(loan);
         return "Loan guardado con Exito";

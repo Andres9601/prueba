@@ -35,6 +35,8 @@ public class Loan {
 
     private BigDecimal installmentValue;
 
+    private BigDecimal balance;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "Client")
     @JsonBackReference
@@ -102,6 +104,14 @@ public class Loan {
 
     public void setInstallmentValue(BigDecimal installmentValue) {
         this.installmentValue = installmentValue;
+    }
+
+    public BigDecimal getBalance() {
+        return balance;
+    }
+
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
     }
 
     public Client getClient() {
