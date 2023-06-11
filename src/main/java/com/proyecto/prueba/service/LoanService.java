@@ -1,6 +1,5 @@
 package com.proyecto.prueba.service;
 
-import com.proyecto.prueba.model.dto.ClientDTO;
 import com.proyecto.prueba.model.dto.LoanDTO;
 import com.proyecto.prueba.model.dto.NewLoanDTO;
 import com.proyecto.prueba.model.dto.PayInstallmentsDTO;
@@ -19,7 +18,7 @@ public interface LoanService {
     String saveLoan (NewLoanDTO loanDTO) throws IllegalAccessException;
 
     @Qualifier(value = "LoanServiceImpl")
-    String updateLoan (LoanDTO loanDTO) throws IllegalAccessException;
+    String updateLoan (NewLoanDTO loanDTO) throws IllegalAccessException;
 
     @Qualifier(value = "LoanServiceImpl")
     String deleteLoan (Long idLoan);

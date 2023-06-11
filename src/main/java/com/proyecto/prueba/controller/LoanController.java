@@ -4,6 +4,7 @@ import com.proyecto.prueba.model.dto.LoanDTO;
 import com.proyecto.prueba.model.dto.NewLoanDTO;
 import com.proyecto.prueba.model.dto.PayInstallmentsDTO;
 import com.proyecto.prueba.service.LoanService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/loan/")
+@SecurityRequirement(name = "bearerAuth")
 public class LoanController {
 
     @Autowired
@@ -42,7 +44,7 @@ public class LoanController {
     }
 
     @PutMapping(path = "update", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> updateLoan(@RequestBody LoanDTO loanDTO) {
+    public ResponseEntity<String> updateLoan(@RequestBody NewLoanDTO loanDTO) {
         try {
             return ResponseEntity.ok(loanService.updateLoan(loanDTO));
 

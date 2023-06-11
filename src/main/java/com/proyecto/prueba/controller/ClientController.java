@@ -2,6 +2,7 @@ package com.proyecto.prueba.controller;
 
 import com.proyecto.prueba.model.dto.ClientDTO;
 import com.proyecto.prueba.service.ClientService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/client/")
+@SecurityRequirement(name = "bearerAuth")
 public class ClientController {
 
     private static final Logger logger = LogManager.getLogger(ClientController.class);

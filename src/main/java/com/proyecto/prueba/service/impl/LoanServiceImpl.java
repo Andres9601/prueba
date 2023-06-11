@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,6 +36,8 @@ public class LoanServiceImpl implements LoanService {
 
     @Autowired
     UtilsOperations utilsOperations;
+
+    MathContext mathContext = new MathContext(6, RoundingMode.UP);
 
     @Override
     public List<LoanDTO> findLoans() throws Exception {
@@ -64,48 +67,102 @@ public class LoanServiceImpl implements LoanService {
         Loan loan =new Loan();
         LoanDTO loanDTO = newloanDTO.getLoanDTO();
         Optional<Client> client = clientRepository.findById(newloanDTO.getClientId());
-        loanDTO.setInstallmentsPaid(0L);
-        loanDTO.setClient(client.get());
+        if(client.isPresent()){
+            loanDTO.setInstallmentsPaid(0L);
+            loanDTO.setClient(client.get());
 
-        switch (client.get().getClassification()){
-            case "A" :
-                loanDTO.setInterestRate(BigDecimal.valueOf(3L));
-                break;
-            case "B" :
-                loanDTO.setInterestRate(BigDecimal.valueOf(2L));
-                break;
-            default:
-                loanDTO.setInterestRate(BigDecimal.valueOf(1L));
+            switch (client.get().getClassification()){
+                case "A" :
+                    loanDTO.setInterestRate(BigDecimal.valueOf(3L));
+                    break;
+                case "B" :
+                    loanDTO.setInterestRate(BigDecimal.valueOf(2L));
+                    break;
+                default:
+                    loanDTO.setInterestRate(BigDecimal.valueOf(1L));
+            }
+            Long additionalMonths;
+            if (loanDTO.getInstallments()>6) { additionalMonths = loanDTO.getInstallments()-6L;
+            loanDTO.setInterestRate(loanDTO.getInterestRate().add(BigDecimal.valueOf(0.1).multiply(BigDecimal.valueOf(additionalMonths))));
+            }
+            List<BigDecimal> installments = new ArrayList<>();
+            for( int i =0; i<loanDTO.getInstallments();i++ ){
+                BigDecimal parcialInstallment = loanDTO.getValue().divide(BigDecimal.valueOf(loanDTO.getInstallments()), mathContext);
+                BigDecimal totalValue = loanDTO.getValue().subtract( parcialInstallment.multiply(BigDecimal.valueOf(i)) );
+                BigDecimal interest = totalValue.multiply(loanDTO.getInterestRate().divide(BigDecimal.valueOf(100), mathContext));
+                BigDecimal value = parcialInstallment.add( interest );
+                installments.add(value);
+            }
+            BigDecimal addition = BigDecimal.valueOf(0);
+            for (BigDecimal installment:installments
+                 ) {
+                addition=  addition.add(installment);
+            }
+            loanDTO.setInstallmentValue(addition.divide(BigDecimal.valueOf(loanDTO.getInstallments()), mathContext));
+            loanDTO.setBalance(loanDTO.getValue());
+            loanDTO.setCreateDate(new Date());
+            loanDTO.setStatus("active");
+            utilsOperations.copyFields(loanDTO,loan);
+            loanRepository.save(loan);
+            return "Loan guardado con Exito";
+        }else{
+            throw new IllegalArgumentException(" El cliente no existe en el sistema");
         }
-        Long additionalMonths;
-        if (loanDTO.getInstallments()>6) { additionalMonths = loanDTO.getInstallments()-6L;
-        loanDTO.setInterestRate(loanDTO.getInterestRate().add(BigDecimal.valueOf(0.1).multiply(BigDecimal.valueOf(additionalMonths))));
-        }
-        List<BigDecimal> installments = new ArrayList<>();
-        for( int i =0; i<loanDTO.getInstallments();i++ ){
-            BigDecimal parcialInstallment = loanDTO.getValue().divide(BigDecimal.valueOf(loanDTO.getInstallments()), RoundingMode.UP);
-            BigDecimal totalValue = loanDTO.getValue().subtract( parcialInstallment.multiply(BigDecimal.valueOf(i)) );
-            BigDecimal interest = totalValue.multiply(loanDTO.getInterestRate().divide(BigDecimal.valueOf(100)));
-            BigDecimal value = parcialInstallment.add( interest );
-            installments.add(value);
-        }
-        BigDecimal addition = BigDecimal.valueOf(0);
-        for (BigDecimal installment:installments
-             ) {
-            addition=  addition.add(installment);
-        }
-        loanDTO.setInstallmentValue(addition.divide(BigDecimal.valueOf(loanDTO.getInstallments())));
-        loanDTO.setBalance(loanDTO.getValue());
-        loanDTO.setCreateDate(new Date());
-        loanDTO.setStatus("active");
-        utilsOperations.copyFields(loanDTO,loan);
-        loanRepository.save(loan);
-        return "Loan guardado con Exito";
     }
 
     @Override
-    public String updateLoan(LoanDTO loanDTO) throws IllegalAccessException {
-        return null;
+    public String updateLoan(NewLoanDTO newloanDTO) throws IllegalAccessException {
+        logger.info(" Buscando Loan con ese numero de identificacion");
+
+        Optional<Loan> loanTemp = loanRepository.findById(newloanDTO.getLoanDTO().getIdLoan());
+        if (loanTemp.isPresent()) {
+            Loan loan = loanTemp.get();
+            LoanDTO loanDTO = newloanDTO.getLoanDTO();
+            Optional<Client> client = clientRepository.findById(newloanDTO.getClientId());
+            if(client.isPresent()){
+                loanDTO.setInstallmentsPaid(loan.getInstallmentsPaid());
+                loanDTO.setClient(client.get());
+
+                switch (client.get().getClassification()){
+                    case "A" :
+                        loanDTO.setInterestRate(BigDecimal.valueOf(3L));
+                        break;
+                    case "B" :
+                        loanDTO.setInterestRate(BigDecimal.valueOf(2L));
+                        break;
+                    default:
+                        loanDTO.setInterestRate(BigDecimal.valueOf(1L));
+                }
+                Long additionalMonths;
+                if (loanDTO.getInstallments()>6) { additionalMonths = loanDTO.getInstallments()-6L;
+                    loanDTO.setInterestRate(loanDTO.getInterestRate().add(BigDecimal.valueOf(0.1).multiply(BigDecimal.valueOf(additionalMonths))));
+                }
+                List<BigDecimal> installments = new ArrayList<>();
+                for( int i =0; i<loanDTO.getInstallments();i++ ){
+                    BigDecimal parcialInstallment = loanDTO.getValue().divide(BigDecimal.valueOf(loanDTO.getInstallments()), mathContext);
+                    BigDecimal totalValue = loanDTO.getValue().subtract( parcialInstallment.multiply(BigDecimal.valueOf(i)) );
+                    BigDecimal interest = totalValue.multiply(loanDTO.getInterestRate().divide(BigDecimal.valueOf(100), mathContext));
+                    BigDecimal value = parcialInstallment.add( interest );
+                    installments.add(value);
+                }
+                BigDecimal addition = BigDecimal.valueOf(0);
+                for (BigDecimal installment:installments
+                ) {
+                    addition=  addition.add(installment);
+                }
+                loanDTO.setInstallmentValue(addition.divide(BigDecimal.valueOf(loanDTO.getInstallments()), mathContext));
+                loanDTO.setBalance(loan.getBalance());
+                loanDTO.setCreateDate(loan.getCreateDate());
+                loanDTO.setStatus(loan.getStatus());
+                utilsOperations.copyFields(loanDTO,loan);
+                loanRepository.save(loan);
+                return "Loan guardado con Exito";
+            }else{
+                throw new IllegalArgumentException(" El cliente no existe en el sistema");
+            }
+        } else {
+            throw new IllegalArgumentException(" El loan no existe en el sistema");
+        }
     }
 
     @Override
@@ -134,12 +191,15 @@ public class LoanServiceImpl implements LoanService {
             utilsOperations.copyFields(loanTemp.get(),loanDTO);
             logger.info(" Loan encontrado");
             logger.info(" Pagando Cuotas al loan encontrado");
-            if(payInstallmentsDTO.getNumber()<= (loanDTO.getInstallments()-loanDTO.getInstallmentsPaid())) {
+            if(!payInstallmentsDTO.getNumber().equals(0L)&&payInstallmentsDTO.getNumber()<= (loanDTO.getInstallments()-loanDTO.getInstallmentsPaid())) {
                 loanDTO.setInstallmentsPaid(loanDTO.getInstallmentsPaid() + payInstallmentsDTO.getNumber());
-                BigDecimal partialInstallments = loanDTO.getValue().divide(BigDecimal.valueOf(loanDTO.getInstallments()),RoundingMode.UP);
+                BigDecimal partialInstallments = loanDTO.getValue().divide(BigDecimal.valueOf(loanDTO.getInstallments()),mathContext);
                 loanDTO.setBalance(loanDTO.getBalance().subtract(partialInstallments.multiply(BigDecimal.valueOf(loanDTO.getInstallmentsPaid()))));
+                if(loanDTO.getInstallmentsPaid().equals(loanDTO.getInstallments())) {
+                    loanDTO.setStatus("closed");
+                }
                 Loan loan = new Loan();
-                utilsOperations.copyFields(loanDTO,loan);
+                utilsOperations.copyFields(loanDTO, loan);
                 loanRepository.save(loan);
                 logger.info(" Loan actualizado con Exito");
                 return "Loan actualizado con Exito";
@@ -150,6 +210,9 @@ public class LoanServiceImpl implements LoanService {
             throw new IllegalArgumentException(" El loan no existe en el sistema");
         }
     }
+
+
+
 
 }
 
