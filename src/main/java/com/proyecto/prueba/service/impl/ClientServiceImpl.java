@@ -16,6 +16,9 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of the ClientService interface.
+ */
 @Service
 public class ClientServiceImpl implements ClientService {
 

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Field;
 
 /**
- * * The class of some utilities.
+ * * The implementation class of some utilities.
  *
  */
 
