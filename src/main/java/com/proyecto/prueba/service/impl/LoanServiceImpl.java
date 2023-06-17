@@ -75,6 +75,9 @@ public class LoanServiceImpl implements LoanService {
         logger.info("Realizando validaciones");
         if (loanDTO.getIdLoan()==null||loanDTO.getInstallments()==null||loanDTO.getValue()==null){
             throw new IllegalArgumentException("Se requiere un idLoan, un value y el numero de installments para guardar el credito");}
+        Optional<Loan> loanTemp =loanRepository.findById(loanDTO.getIdLoan());
+        if(loanTemp.isPresent()){
+            throw new IllegalArgumentException("El loan ya existe en el sistema");}
         Optional<Client> client = clientRepository.findById(newloanDTO.getClientId());
         if (client.isPresent()) {
             loanDTO.setInstallmentsPaid(0L);
@@ -165,6 +168,9 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public String payIntallments(PayInstallmentsDTO payInstallmentsDTO) throws IllegalAccessException {
+        logger.info(" Buscando loan con ese numero de identificacion");
+        if (payInstallmentsDTO.getIdLoan()==null||payInstallmentsDTO.getNumber()==null){
+            throw new ExceptionsClass("Se requiere un idLoan y un number valido de cuotas por pagar al credito");}
         Optional<Loan> loanTemp = loanRepository.findById(payInstallmentsDTO.getIdLoan());
         if (loanTemp.isPresent()) {
             LoanDTO loanDTO = new LoanDTO();
@@ -179,7 +185,9 @@ public class LoanServiceImpl implements LoanService {
                     loanDTO.setStatus("closed");
                 }
                 Loan loan = new Loan();
+                logger.info("Copiando DTO a Entity");
                 utilsOperations.copyFields(loanDTO, loan);
+                logger.info("Actualizando el Loan");
                 loanRepository.save(loan);
                 logger.info(" Loan actualizado con Exito");
                 return "Loan actualizado con Exito";
