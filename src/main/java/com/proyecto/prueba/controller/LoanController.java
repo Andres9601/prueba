@@ -1,5 +1,6 @@
 package com.proyecto.prueba.controller;
 
+import com.proyecto.prueba.Exceptions.ExceptionsClass;
 import com.proyecto.prueba.model.dto.NewLoanDTO;
 import com.proyecto.prueba.model.dto.PayInstallmentsDTO;
 import com.proyecto.prueba.service.LoanService;
@@ -31,8 +32,8 @@ public class LoanController {
         try {
             return ResponseEntity.ok(loanService.findLoans());
         } catch (Exception e) {
-            logger.error("error en {} ", LoanController.class + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            logger.warn(" error en {} ", LoanController.class + e.getMessage());
+            throw new ExceptionsClass(e.getMessage());
         }
     }
 
@@ -49,7 +50,7 @@ public class LoanController {
             return ResponseEntity.ok(loanService.saveLoan(loanDTO));
         } catch (Exception e) {
             logger.error("error en {} ", LoanController.class + e.getMessage());
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+            throw  new ExceptionsClass("No se logró guardar el credito, revise la peticion, presenta el error: " + e.getMessage());
         }
     }
 
@@ -66,7 +67,7 @@ public class LoanController {
 
         } catch (Exception e) {
             logger.error("error en {} ", LoanController.class + e.getMessage());
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+            throw  new ExceptionsClass("No se logró actualizar el credito, revise la peticion, presenta el error: " + e.getMessage());
         }
     }
 
@@ -77,12 +78,12 @@ public class LoanController {
      * @return ResponseEntity with a success message on success, or an error message on failure.
      */
     @DeleteMapping(path = "delete")
-    public ResponseEntity<String> deleteLoan(@RequestParam("idLoan") Long idLoan) {
+    public ResponseEntity<String> deleteLoan(@RequestParam(value = "idLoan") Long idLoan) {
         try {
             return ResponseEntity.ok(loanService.deleteLoan(idLoan));
         } catch (Exception e) {
             logger.error("error en {} ", LoanController.class + e.getMessage());
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getCause() + e.getMessage());
+            throw  new ExceptionsClass("No se logró eliminar el credito, revise la peticion, presenta el error: " + e.getMessage());
         }
 
     }
@@ -100,7 +101,7 @@ public class LoanController {
 
         } catch (Exception e) {
             logger.error("error en {} ", LoanController.class + e.getMessage());
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+            throw  new ExceptionsClass("No se logró pagar cuotas al credito, revise la peticion, presenta el error: " + e.getMessage());
         }
     }
 

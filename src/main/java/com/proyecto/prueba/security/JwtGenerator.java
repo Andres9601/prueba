@@ -1,5 +1,6 @@
 package com.proyecto.prueba.security;
 
+import com.proyecto.prueba.Exceptions.ExceptionsClass;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -41,7 +42,7 @@ public class JwtGenerator {
                 Jwts.parser().setSigningKey(SecurityConsts.JWT_FIRMA).parseClaimsJws(token);
                 return true;
             } catch (Exception e) {
-                throw new AuthenticationCredentialsNotFoundException("Jwt ah expirado o esta incorrecto");
+                throw new ExceptionsClass("El token JWT ha expirado o esta incorrecto");
             }
         }
 

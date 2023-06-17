@@ -1,5 +1,6 @@
 package com.proyecto.prueba.service;
 
+import com.proyecto.prueba.Exceptions.ExceptionsClass;
 import com.proyecto.prueba.model.dto.LoanDTO;
 import com.proyecto.prueba.model.dto.NewLoanDTO;
 import com.proyecto.prueba.model.dto.PayInstallmentsDTO;
@@ -21,7 +22,7 @@ public interface LoanService {
      * @throws Exception if an error occurs while retrieving the loans.
      */
     @Qualifier(value = "LoanServiceImpl")
-    List<LoanDTO> findLoans() throws Exception;
+    List<LoanDTO> findLoans() throws ExceptionsClass;
 
 
     /**

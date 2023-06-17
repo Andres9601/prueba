@@ -1,5 +1,6 @@
 package com.proyecto.prueba.service.impl;
 
+import com.proyecto.prueba.Exceptions.ExceptionsClass;
 import com.proyecto.prueba.model.dto.LoanDTO;
 import com.proyecto.prueba.model.dto.NewLoanDTO;
 import com.proyecto.prueba.model.dto.PayInstallmentsDTO;
@@ -43,8 +44,8 @@ public class LoanServiceImpl implements LoanService {
     MathContext mathContext = new MathContext(6, RoundingMode.UP);
 
     @Override
-    public List<LoanDTO> findLoans() throws Exception {
-
+    public List<LoanDTO> findLoans() throws ExceptionsClass {
+        logger.info("Buscando loans...");
         List<Loan> loans = loanRepository.findAll();
         List<LoanDTO> loansDTO = loans.stream()
                 .map(loan -> {
@@ -52,7 +53,7 @@ public class LoanServiceImpl implements LoanService {
                     try {
                         utilsOperations.copyFields(loan, loanDTO);
                     } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
+                        throw new ExceptionsClass(e.getMessage());
                     }
                     return loanDTO;
                 })
@@ -61,19 +62,24 @@ public class LoanServiceImpl implements LoanService {
             logger.info(" Se retornan los loans encontrados");
             return loansDTO;
         } else {
-            throw new Exception(" Busqueda vacia");
+            throw new ExceptionsClass("Busqueda vacia");
         }
     }
 
     @Override
     public String saveLoan(NewLoanDTO newloanDTO) throws IllegalAccessException {
         Loan loan = new Loan();
+        if (newloanDTO.getLoanDTO()==null||newloanDTO.getClientId()==null){
+            throw new IllegalArgumentException("Se requiere un loanDTO y un ClientId para guardar el credito");}
         LoanDTO loanDTO = newloanDTO.getLoanDTO();
+        logger.info("Realizando validaciones");
+        if (loanDTO.getIdLoan()==null||loanDTO.getInstallments()==null||loanDTO.getValue()==null){
+            throw new IllegalArgumentException("Se requiere un idLoan, un value y el numero de installments para guardar el credito");}
         Optional<Client> client = clientRepository.findById(newloanDTO.getClientId());
         if (client.isPresent()) {
             loanDTO.setInstallmentsPaid(0L);
             loanDTO.setClient(client.get());
-
+            logger.info("Cliente encontrado, se procede a calular installments");
             List<BigDecimal>  installments = calculateInstallments(loanDTO);
             BigDecimal addition = BigDecimal.valueOf(0);
             for (BigDecimal installment : installments
@@ -84,9 +90,11 @@ public class LoanServiceImpl implements LoanService {
             loanDTO.setBalance(loanDTO.getValue());
             loanDTO.setCreateDate(new Date());
             loanDTO.setStatus("active");
+            logger.info("Copiando DTO a Entity");
             utilsOperations.copyFields(loanDTO, loan);
+            logger.info("Guardando Loan");
             loanRepository.save(loan);
-            return "Loan guardado con Exito";
+            return "Credito guardado con Exito";
         } else {
             throw new IllegalArgumentException(" El cliente no existe en el sistema");
         }
@@ -94,17 +102,23 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public String updateLoan(NewLoanDTO newloanDTO) throws IllegalAccessException {
+        if (newloanDTO.getLoanDTO()==null||newloanDTO.getClientId()==null){
+            throw new IllegalArgumentException("Se requiere un loanDTO y un ClientId para actualizar el credito");}
+        if(newloanDTO.getLoanDTO().getIdLoan()==null){
+            throw new IllegalArgumentException("Se requiere un idLoan valido para actualizar el credito");}
         logger.info(" Buscando Loan con ese numero de identificacion");
-
         Optional<Loan> loanTemp = loanRepository.findById(newloanDTO.getLoanDTO().getIdLoan());
         if (loanTemp.isPresent()&&loanTemp.get().getInstallmentsPaid().equals(0L)) {
             Loan loan = loanTemp.get();
             LoanDTO loanDTO = newloanDTO.getLoanDTO();
+            logger.info("Realizando validaciones");
+            if (loanDTO.getIdLoan()==null||loanDTO.getInstallments()==null||loanDTO.getValue()==null){
+                throw new IllegalArgumentException("Se requiere un idLoan, un value y el numero de installments para guardar el credito");}
             Optional<Client> client = clientRepository.findById(newloanDTO.getClientId());
             if (client.isPresent()) {
                 loanDTO.setInstallmentsPaid(loan.getInstallmentsPaid());
                 loanDTO.setClient(client.get());
-
+                logger.info("Cliente encontrado, se procede a calular installments");
                 List<BigDecimal>  installments = calculateInstallments(loanDTO);
 
                 BigDecimal addition = BigDecimal.valueOf(0);
@@ -116,20 +130,24 @@ public class LoanServiceImpl implements LoanService {
                 loanDTO.setBalance(loanDTO.getValue());
                 loanDTO.setCreateDate(loan.getCreateDate());
                 loanDTO.setStatus(loan.getStatus());
+                logger.info("Copiando DTO a Entity");
                 utilsOperations.copyFields(loanDTO, loan);
+                logger.info("Actualizando Loan");
                 loanRepository.save(loan);
-                return "Loan guardado con Exito";
+                return "Credito actualizado con Exito";
             } else {
                 throw new IllegalArgumentException(" El cliente no existe en el sistema");
             }
         } else {
-            throw new IllegalArgumentException(" El loan no existe en el sistema o ya tiene cuotas pagadas");
+            throw new IllegalArgumentException(" El Credito no existe en el sistema o ya tiene cuotas pagadas");
         }
     }
 
     @Override
     public String deleteLoan(Long idLoan) {
         logger.info(" Buscando loan con ese numero de identificacion");
+        if (idLoan==null){
+            throw new ExceptionsClass("Se requiere un idLoan para eliminar el credito");}
         Optional<Loan> loanTemp = loanRepository.findById(idLoan);
         if (loanTemp.isPresent()) {
             Client client = loanTemp.get().getClient();
@@ -169,22 +187,18 @@ public class LoanServiceImpl implements LoanService {
                 throw new IllegalArgumentException(" No se pueden pagar ese numero de cuotas");
             }
         } else {
-            throw new IllegalArgumentException(" El loan no existe en el sistema");
+            throw new IllegalArgumentException(" El Credito no existe en el sistema");
         }
     }
 
     private List<BigDecimal> calculateInstallments(LoanDTO loanDTO) {
+        logger.info("Calculando Installments...");
         switch (loanDTO.getClient().getClassification()) {
-            case "A":
-                loanDTO.setInterestRate(BigDecimal.valueOf(3L));
-                break;
-            case "B":
-                loanDTO.setInterestRate(BigDecimal.valueOf(2L));
-                break;
-            default:
-                loanDTO.setInterestRate(BigDecimal.valueOf(1L));
+            case "A" -> loanDTO.setInterestRate(BigDecimal.valueOf(3L));
+            case "B" -> loanDTO.setInterestRate(BigDecimal.valueOf(2L));
+            default -> loanDTO.setInterestRate(BigDecimal.valueOf(1L));
         }
-        Long additionalMonths;
+        long additionalMonths;
         if (loanDTO.getInstallments() > 6) {
             additionalMonths = loanDTO.getInstallments() - 6L;
             loanDTO.setInterestRate(loanDTO.getInterestRate().add(BigDecimal.valueOf(0.1).multiply(BigDecimal.valueOf(additionalMonths))));

@@ -1,5 +1,6 @@
 package com.proyecto.prueba.controller;
 
+import com.proyecto.prueba.Exceptions.ExceptionsClass;
 import com.proyecto.prueba.model.dto.ClientDTO;
 import com.proyecto.prueba.service.ClientService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * The controller class for the Client database table.
- *
  */
 
 @RestController
@@ -54,7 +54,7 @@ public class ClientController {
             return ResponseEntity.ok(clientService.saveClient(clientDTO));
         } catch (Exception e) {
             logger.error("error en {} ", ClientController.class + e.getMessage());
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+            throw new ExceptionsClass("No se logró guardar el cliente, revise la peticion, presenta el error: " + e.getMessage());
         }
     }
 
@@ -71,7 +71,7 @@ public class ClientController {
 
         } catch (Exception e) {
             logger.error("error en {} ", ClientController.class + e.getMessage());
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+            throw new ExceptionsClass("No se logró actualizar el cliente, revise la peticion, presenta el error: " + e.getMessage());
         }
     }
 
@@ -87,7 +87,7 @@ public class ClientController {
             return ResponseEntity.ok(clientService.deleteClient(identification));
         } catch (Exception e) {
             logger.error("error en {} ", ClientController.class + e.getMessage());
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getCause() + e.getMessage());
+            throw new ExceptionsClass("No se logró eliminar el cliente, revise la peticion, presenta el error: " + e.getMessage());
         }
 
     }

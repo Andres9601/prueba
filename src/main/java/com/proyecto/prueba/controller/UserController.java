@@ -1,7 +1,9 @@
 package com.proyecto.prueba.controller;
 
+import com.proyecto.prueba.Exceptions.ExceptionsClass;
 import com.proyecto.prueba.model.dto.AuthResponseDTO;
-import com.proyecto.prueba.model.dto.LogUpDTO;
+import com.proyecto.prueba.model.dto.ExceptionResponseDTO;
+import com.proyecto.prueba.model.dto.SignUpDTO;
 import com.proyecto.prueba.model.dto.LoginDTO;
 import com.proyecto.prueba.model.entity.Rol;
 import com.proyecto.prueba.model.entity.User;
@@ -47,14 +49,14 @@ public class UserController {
     /**
      * Endpoint to register an admin user.
      *
-     * @param logUpDTO The LogUpDTO object containing the admin user details.
+     * @param signUpDTO The SignUpDTO object containing the admin user details.
      * @return ResponseEntity with a success message on success, or an error message on failure.
      */
     @PostMapping("registerAdm")
-    public ResponseEntity<String> registrarAdmin(@RequestBody LogUpDTO logUpDTO) {
+    public ResponseEntity<String> registrarAdmin(@RequestBody SignUpDTO signUpDTO) {
         User user = new User();
-        user.setUsername(logUpDTO.getUsername());
-        user.setPassword(passwordEncoder.encode(logUpDTO.getPassword()));
+        user.setUsername(signUpDTO.getUsername());
+        user.setPassword(passwordEncoder.encode(signUpDTO.getPassword()));
         Set<UserRol> userRols = new HashSet<>();
         UserRol userrol1 = new UserRol();
         Rol rol1 = new Rol();
@@ -75,7 +77,7 @@ public class UserController {
      * @return ResponseEntity with the JWT token on success, or an error message on failure.
      */
     @PostMapping("login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
         try{
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginDTO.getUsername(), loginDTO.getPassword()));
@@ -83,7 +85,8 @@ public class UserController {
         String token = jwtGenerator.generarToken(authentication);
         return new ResponseEntity<>(new AuthResponseDTO(token), HttpStatus.OK);
         }catch (Exception e){
-        return new ResponseEntity<>(new AuthResponseDTO("Credenciales invalidas"), HttpStatus.UNAUTHORIZED);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponseDTO.builder()
+                .status(HttpStatus.UNAUTHORIZED.value()).error("Credenciales invalidas").build());
         }
     }
 
