@@ -19,6 +19,7 @@ public class Loan {
 
     @Id
     @Column(name = "id_loan")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idLoan;
 
     private Date createDate;

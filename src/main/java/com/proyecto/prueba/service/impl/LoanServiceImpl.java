@@ -70,14 +70,11 @@ public class LoanServiceImpl implements LoanService {
     public String saveLoan(NewLoanDTO newloanDTO) throws IllegalAccessException {
         Loan loan = new Loan();
         if (newloanDTO.getLoanDTO()==null||newloanDTO.getClientId()==null){
-            throw new IllegalArgumentException("Se requiere un loanDTO y un ClientId para guardar el credito");}
+            throw new IllegalArgumentException("Se requiere un loanDTO (con un value y el numero de installments) y un ClientId para guardar el credito");}
         LoanDTO loanDTO = newloanDTO.getLoanDTO();
         logger.info("Realizando validaciones");
-        if (loanDTO.getIdLoan()==null||loanDTO.getInstallments()==null||loanDTO.getValue()==null){
-            throw new IllegalArgumentException("Se requiere un idLoan, un value y el numero de installments para guardar el credito");}
-        Optional<Loan> loanTemp =loanRepository.findById(loanDTO.getIdLoan());
-        if(loanTemp.isPresent()){
-            throw new IllegalArgumentException("El loan ya existe en el sistema");}
+        if (loanDTO.getInstallments()==null||loanDTO.getValue()==null){
+            throw new IllegalArgumentException("Se requiere un value y el numero de installments para guardar el credito");}
         Optional<Client> client = clientRepository.findById(newloanDTO.getClientId());
         if (client.isPresent()) {
             loanDTO.setInstallmentsPaid(0L);
