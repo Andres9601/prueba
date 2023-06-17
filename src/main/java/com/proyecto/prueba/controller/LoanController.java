@@ -94,8 +94,8 @@ public class LoanController {
      * @param payInstallmentsDTO The PayInstallmentsDTO object representing the payment details.
      * @return ResponseEntity with a success message on success, or an error message on failure.
      */
-    @PutMapping(path = "payIntallments", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> payIntallments(@RequestBody PayInstallmentsDTO payInstallmentsDTO) {
+    @PutMapping(path = "payInstallments", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> payInstallments(@RequestBody PayInstallmentsDTO payInstallmentsDTO) {
         try {
             return ResponseEntity.ok(loanService.payIntallments(payInstallmentsDTO));
 
