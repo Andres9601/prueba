@@ -166,7 +166,7 @@ public class LoanServiceImpl implements LoanService {
     @Override
     public String payIntallments(PayInstallmentsDTO payInstallmentsDTO) throws IllegalAccessException {
         logger.info(" Buscando loan con ese numero de identificacion");
-        if (payInstallmentsDTO.getIdLoan()==null||payInstallmentsDTO.getNumber()==null){
+        if (payInstallmentsDTO.getIdLoan()==null||payInstallmentsDTO.getNumber()==null||payInstallmentsDTO.getNumber()<=0L){
             throw new ExceptionsClass("Se requiere un idLoan y un number valido de cuotas por pagar al credito");}
         Optional<Loan> loanTemp = loanRepository.findById(payInstallmentsDTO.getIdLoan());
         if (loanTemp.isPresent()) {
@@ -175,9 +175,9 @@ public class LoanServiceImpl implements LoanService {
             logger.info(" Loan encontrado");
             logger.info(" Pagando Cuotas al loan encontrado");
             if (!payInstallmentsDTO.getNumber().equals(0L) && payInstallmentsDTO.getNumber() <= (loanDTO.getInstallments() - loanDTO.getInstallmentsPaid())) {
-                loanDTO.setInstallmentsPaid(loanDTO.getInstallmentsPaid() + payInstallmentsDTO.getNumber());
                 BigDecimal partialInstallments = loanDTO.getValue().divide(BigDecimal.valueOf(loanDTO.getInstallments()), mathContext);
-                loanDTO.setBalance(loanDTO.getBalance().subtract(partialInstallments.multiply(BigDecimal.valueOf(loanDTO.getInstallmentsPaid()))));
+                loanDTO.setBalance(loanDTO.getBalance().subtract(partialInstallments.multiply(BigDecimal.valueOf(payInstallmentsDTO.getNumber()))));
+                loanDTO.setInstallmentsPaid(loanDTO.getInstallmentsPaid() + payInstallmentsDTO.getNumber());
                 if (loanDTO.getInstallmentsPaid().equals(loanDTO.getInstallments())) {
                     loanDTO.setStatus("closed");
                 }
